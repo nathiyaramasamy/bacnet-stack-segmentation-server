@@ -96,6 +96,31 @@ static int Encode_RR_payload(uint8_t *apdu, BACNET_READ_RANGE_DATA *pRequest)
 }
 
 /**
+ * @brief Validates the parameters of a Read Range request.
+ *
+ * This function checks for missing required parameters in the Read Range
+ * request. If a required parameter is missing, it returns -3 to indicate a
+ * reject.
+ *
+ * @param pRequest Pointer to the BACNET_READ_RANGE_DATA request to validate.
+ * @return int Returns -3 if a required parameter is missing, otherwise returns
+ * 0.
+ */
+static int Validate_RR_request(BACNET_READ_RANGE_DATA* pRequest)
+{
+    if ((pRequest->Count == INT32_MAX) &&
+        (pRequest->RequestType != RR_READ_ALL)) {
+        return (-3); /* Reject - missing required parameter - Count */
+    } else if (
+        (pRequest->Range.RefIndex == UINT32_MAX) &&
+        ((pRequest->RequestType == RR_BY_POSITION) ||
+        (pRequest->RequestType == RR_BY_SEQUENCE))) {
+        return (-3); /* Reject - missing required parameter- Refernce index */
+    }
+    return 0;
+}
+
+/**
  * Handle the received ReadRange request and encode a response.
  *
  *  @param service_request  Pointer to the service request.
